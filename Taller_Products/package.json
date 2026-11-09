@@ -1,0 +1,29 @@
+{
+  "name": "taller-products",
+  "version": "1.0.0",
+  "description": "Serverless project for the products repository",
+  "main": "index.js",
+  "scripts": {
+    "build": "serverless package --stage local",
+    "deploy": "serverless deploy --stage local --aws-profile localstack",
+    "deploy:dev": "serverless deploy --stage develop --aws-profile charlie-personal-taller",
+    "remove:dev": "serverless remove --stage develop --aws-profile charlie-personal-taller"
+  },
+  "author": "charlie.gallegos",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.726.1",
+    "@aws-sdk/lib-dynamodb": "^3.726.1",
+    "uuid": "^11.0.5",
+    "@aws-sdk/client-lambda": "^3.726.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.155",
+    "@types/node": "^24.6.2",
+    "@types/uuid": "^10.0.0",
+    "serverless": "^4.20.2",
+    "serverless-localstack": "^1.3.1",
+    "serverless-offline": "^14.4.0",
+    "typescript": "^5.9.3"
+  }
+}

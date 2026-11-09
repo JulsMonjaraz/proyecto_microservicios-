@@ -1,0 +1,128 @@
+service: taller-notify
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, 'local'}
+  region: us-east-1
+  timeout: 30
+  # Se cuelga del API Gateway del Taller_Gateway (mismos exports que usan Users/Products/Orders)
+  apiGateway:
+    restApiId: !ImportValue MainRestApiId
+    restApiRootResourceId: !ImportValue MainRestApiRootResourceId
+  environment:
+    NOTIFICATIONS_TABLE: !Ref NotificationsTable
+    STAGE: ${self:provider.stage}
+    CORS_ORIGINS: ${file(./config/config-${self:provider.stage}.json):CORS_ORIGINS}
+    SENDER_EMAIL: ${env:SENDER_EMAIL, 'notificaciones@amazonlite.com'}
+    ADMIN_EMAIL: ${env:ADMIN_EMAIL, 'admin@amazonlite.com'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+          Resource:
+            - !GetAtt NotificationsTable.Arn
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+            - ses:SendRawEmail
+          Resource: "*"
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:taller-users-${self:provider.stage}-*"
+
+plugins:
+  - serverless-localstack
+
+custom:
+  localstack:
+    stages: [local]
+    host: http://localhost
+    edgePort: 4566
+    autostart: false
+
+build:
+  esbuild:
+    bundle: true
+    sourcemap: true
+    target: node22
+
+functions:
+  # 1. Notificar al comprador por su compra
+  #    (Orders la invoca por Lambda al crear una orden; también se puede llamar por HTTP)
+  notifyPurchase:
+    handler: src/handlers/notifyPurchase.notifyPurchase
+    events:
+      - http:
+          method: post
+          path: /notify/purchase
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
+  # 2. Mandar promociones a usuarios (solo vendedores por HTTP)
+  sendPromotion:
+    handler: src/handlers/sendPromotion.sendPromotion
+    timeout: 29
+    events:
+      - http:
+          method: post
+          path: /notify/promotion
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
+  # 3. Alertar que un producto se agotó
+  #    (Products la invoca por Lambda cuando el stock llega a 0)
+  alertOutOfStock:
+    handler: src/handlers/alertOutOfStock.alertOutOfStock
+    events:
+      - http:
+          method: post
+          path: /notify/out-of-stock
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Date
+              - X-Amz-Security-Token
+          authorizer:
+            type: CUSTOM
+            authorizerId: !ImportValue MainAuthorizerId
+
+resources:
+  Resources:
+    NotificationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-notifications
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: notificationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: notificationId
+            KeyType: HASH

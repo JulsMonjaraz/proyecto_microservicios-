@@ -1,0 +1,10 @@
+{
+  "name": "taller-gateway",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "serverless package --stage local",
+    "deploy": "serverless deploy --stage local --aws-profile localstack"
+  },
+  "license": "ISC",
+  "dependencies": {}
+}

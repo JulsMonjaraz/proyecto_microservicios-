@@ -1,0 +1,24 @@
+export interface Product {
+  productId: string;
+  sellerId: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProductInput {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+}
+
+export interface UpdateProductInput {
+  name?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+}

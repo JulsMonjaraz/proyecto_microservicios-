@@ -1,0 +1,13 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      # Desde marzo 2026 la imagen exige token (plan Hobby gratis). Ponlo en .env
+      - LOCALSTACK_AUTH_TOKEN=${LOCALSTACK_AUTH_TOKEN:?Falta LOCALSTACK_AUTH_TOKEN en .env}
+      - SERVICES=lambda,apigateway,dynamodb,ses,s3,cloudformation,iam,sts,logs,ssm,events
+    volumes:
+      # Necesario: las Lambdas corren en contenedores hijos
+      - "/var/run/docker.sock:/var/run/docker.sock"

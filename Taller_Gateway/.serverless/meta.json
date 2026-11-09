@@ -1,0 +1,2044 @@
+{
+  "/Users/juliomonjaraz/Downloads/proyecto-final 2/Taller_Gateway/serverless.yml": {
+    "versionFramework": "4.46.0",
+    "servicePath": "/Users/juliomonjaraz/Downloads/proyecto-final 2/Taller_Gateway/serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "service": "taller-gateway",
+      "frameworkVersion": "4",
+      "build": {
+        "esbuild": {
+          "bundle": true,
+          "minify": false,
+          "sourcemap": true,
+          "target": "node22"
+        }
+      },
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs22.x",
+        "stage": "local",
+        "region": "us-east-1",
+        "environment": {
+          "STAGE": "local",
+          "JWT_SECRET": "<REDACTED>",
+          "CORS_ORIGINS": "*"
+        },
+        "apiGateway": {
+          "usagePlan": [
+            {
+              "freeTier": {
+                "quota": {
+                  "limit": 10000,
+                  "period": "MONTH"
+                },
+                "throttle": {
+                  "rateLimit": 10,
+                  "burstLimit": 20
+                }
+              }
+            }
+          ],
+          "apiKeys": "<REDACTED>"
+        },
+        "iam": {
+          "role": {
+            "statements": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        },
+        "versionFunctions": true,
+        "compiledCloudFormationTemplate": {
+          "AWSTemplateFormatVersion": "2010-09-09",
+          "Description": "The AWS CloudFormation template for this Serverless application",
+          "Resources": {
+            "PingLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/taller-local-Gateway-Ping"
+              }
+            },
+            "AuthorizerLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/taller-local-Authorizer"
+              }
+            },
+            "IamRoleLambdaExecution": {
+              "Type": "AWS::IAM::Role",
+              "Properties": {
+                "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Principal": {
+                        "Service": [
+                          "lambda.amazonaws.com"
+                        ]
+                      },
+                      "Action": [
+                        "sts:AssumeRole"
+                      ]
+                    }
+                  ]
+                },
+                "Policies": [
+                  {
+                    "PolicyName": {
+                      "Fn::Join": [
+                        "-",
+                        [
+                          "taller-gateway",
+                          "local",
+                          "lambda"
+                        ]
+                      ]
+                    },
+                    "PolicyDocument": {
+                      "Version": "2012-10-17",
+                      "Statement": [
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogStream",
+                            "logs:CreateLogGroup",
+                            "logs:TagResource"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Gateway-Ping:*"
+                            },
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Authorizer:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Gateway-Ping:*:*"
+                            },
+                            {
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Authorizer:*:*"
+                            }
+                          ]
+                        },
+                        {
+                          "Effect": "Allow",
+                          "Action": [
+                            "logs:CreateLogGroup",
+                            "logs:CreateLogStream",
+                            "logs:PutLogEvents"
+                          ],
+                          "Resource": "*"
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "Path": "/",
+                "RoleName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "taller-gateway",
+                      "local",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "lambdaRole"
+                    ]
+                  ]
+                }
+              }
+            },
+            "PingLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+                  "S3Key": "serverless/taller-gateway/local/1794257279862-2026-11-09T20:47:59.862Z/taller-gateway.zip"
+                },
+                "Handler": "src/handlers/ping.ping",
+                "Runtime": "nodejs22.x",
+                "FunctionName": "taller-local-Gateway-Ping",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "STAGE": "local",
+                    "JWT_SECRET": "<REDACTED>",
+                    "CORS_ORIGINS": "*",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "PingLogGroup"
+              ]
+            },
+            "AuthorizerLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+                  "S3Key": "serverless/taller-gateway/local/1794257279862-2026-11-09T20:47:59.862Z/taller-gateway.zip"
+                },
+                "Handler": "src/handlers/authorizer.authorizer",
+                "Runtime": "nodejs22.x",
+                "FunctionName": "taller-local-Authorizer",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "STAGE": "local",
+                    "JWT_SECRET": "<REDACTED>",
+                    "CORS_ORIGINS": "*",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "AuthorizerLogGroup"
+              ]
+            },
+            "PingLambdaVersionKtqW70yhGhlEFqLjV1981ywJzShv7dPbueIaGw3eSZI": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "PingLambdaFunction"
+                },
+                "CodeSha256": "y+/F+XjyEVFrTidxuqPT7WCMyeJak61D8u0Whw5DHUc="
+              }
+            },
+            "AuthorizerLambdaVersionx7w5hvzBlHYW7EjKAwF9QVlYIl5VFDs5DvnZtjJiM": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "AuthorizerLambdaFunction"
+                },
+                "CodeSha256": "y+/F+XjyEVFrTidxuqPT7WCMyeJak61D8u0Whw5DHUc="
+              }
+            },
+            "ApiGatewayRestApi": {
+              "Type": "AWS::ApiGateway::RestApi",
+              "Properties": {
+                "Name": "local-taller-gateway",
+                "EndpointConfiguration": {
+                  "Types": [
+                    "EDGE"
+                  ]
+                },
+                "Policy": ""
+              }
+            },
+            "ApiGatewayResourcePing": {
+              "Type": "AWS::ApiGateway::Resource",
+              "Properties": {
+                "ParentId": {
+                  "Fn::GetAtt": [
+                    "ApiGatewayRestApi",
+                    "RootResourceId"
+                  ]
+                },
+                "PathPart": "ping",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayMethodPingOptions": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": true,
+                      "method.response.header.Access-Control-Allow-Headers": true,
+                      "method.response.header.Access-Control-Allow-Methods": true
+                    },
+                    "ResponseModels": {}
+                  }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                  "Type": "MOCK",
+                  "RequestTemplates": {
+                    "application/json": "{statusCode:200}"
+                  },
+                  "ContentHandling": "CONVERT_TO_TEXT",
+                  "IntegrationResponses": [
+                    {
+                      "StatusCode": "200",
+                      "ResponseParameters": {
+                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'",
+                        "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                      },
+                      "ResponseTemplates": {
+                        "application/json": ""
+                      }
+                    }
+                  ]
+                },
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourcePing"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                }
+              }
+            },
+            "ApiGatewayMethodPingGet": {
+              "Type": "AWS::ApiGateway::Method",
+              "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                  "Ref": "ApiGatewayResourcePing"
+                },
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": "<REDACTED>",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                  "IntegrationHttpMethod": "POST",
+                  "Type": "AWS_PROXY",
+                  "Uri": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:",
+                        {
+                          "Ref": "AWS::Partition"
+                        },
+                        ":apigateway:",
+                        {
+                          "Ref": "AWS::Region"
+                        },
+                        ":lambda:path/2015-03-31/functions/",
+                        {
+                          "Fn::GetAtt": [
+                            "PingLambdaFunction",
+                            "Arn"
+                          ]
+                        },
+                        "/invocations"
+                      ]
+                    ]
+                  }
+                },
+                "MethodResponses": []
+              },
+              "DependsOn": [
+                "PingLambdaPermissionApiGateway"
+              ]
+            },
+            "ApiGatewayDeployment1794257274677": {
+              "Type": "AWS::ApiGateway::Deployment",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "StageName": "local"
+              },
+              "DependsOn": [
+                "ApiGatewayMethodPingOptions",
+                "ApiGatewayMethodPingGet"
+              ]
+            },
+            "ApiGatewayApiKeyFreeTier1": "<REDACTED>",
+            "ApiGatewayUsagePlanFreeTier": {
+              "Type": "AWS::ApiGateway::UsagePlan",
+              "DependsOn": "ApiGatewayDeployment1794257274677",
+              "Properties": {
+                "ApiStages": [
+                  {
+                    "ApiId": {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "Stage": "local"
+                  }
+                ],
+                "Description": "Usage plan \"freeTier\" for taller-gateway local stage",
+                "UsagePlanName": "taller-gateway-freeTier-local",
+                "Quota": {
+                  "Limit": 10000,
+                  "Period": "MONTH"
+                },
+                "Throttle": {
+                  "BurstLimit": 20,
+                  "RateLimit": 10
+                }
+              }
+            },
+            "ApiGatewayUsagePlanKeyFreeTier1": {
+              "Type": "AWS::ApiGateway::UsagePlanKey",
+              "Properties": {
+                "KeyId": {
+                  "Ref": "ApiGatewayApiKeyFreeTier1"
+                },
+                "KeyType": "API_KEY",
+                "UsagePlanId": {
+                  "Ref": "ApiGatewayUsagePlanFreeTier"
+                }
+              }
+            },
+            "PingLambdaPermissionApiGateway": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "PingLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "ApiGatewayRestApi"
+                      },
+                      "/*/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "MainAuthorizer": {
+              "Type": "AWS::ApiGateway::Authorizer",
+              "Properties": {
+                "Name": "taller-local-jwt-authorizer",
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "Type": "TOKEN",
+                "IdentitySource": "method.request.header.Authorization",
+                "AuthorizerUri": {
+                  "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizerLambdaFunction.Arn}/invocations"
+                },
+                "AuthorizerResultTtlInSeconds": 300
+              }
+            },
+            "AuthorizerInvokePermission": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "AuthorizerLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/*"
+                }
+              }
+            },
+            "GatewayResponseUnauthorized": {
+              "Type": "AWS::ApiGateway::GatewayResponse",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ResponseType": "UNAUTHORIZED",
+                "StatusCode": "401",
+                "ResponseParameters": {
+                  "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                  "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+                }
+              }
+            },
+            "GatewayResponseAccessDenied": {
+              "Type": "AWS::ApiGateway::GatewayResponse",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ResponseType": "ACCESS_DENIED",
+                "StatusCode": "403",
+                "ResponseParameters": {
+                  "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                  "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+                }
+              }
+            },
+            "GatewayResponseDefault4xx": {
+              "Type": "AWS::ApiGateway::GatewayResponse",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ResponseType": "DEFAULT_4XX",
+                "ResponseParameters": {
+                  "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                  "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+                }
+              }
+            },
+            "GatewayResponseDefault5xx": {
+              "Type": "AWS::ApiGateway::GatewayResponse",
+              "Properties": {
+                "RestApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "ResponseType": "DEFAULT_5XX",
+                "ResponseParameters": {
+                  "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                  "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+                }
+              }
+            }
+          },
+          "Outputs": {
+            "ServerlessDeploymentBucketName": {
+              "Value": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+              "Export": {
+                "Name": "sls-taller-gateway-local-ServerlessDeploymentBucketName"
+              }
+            },
+            "PingLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "PingLambdaVersionKtqW70yhGhlEFqLjV1981ywJzShv7dPbueIaGw3eSZI"
+              },
+              "Export": {
+                "Name": "sls-taller-gateway-local-PingLambdaFunctionQualifiedArn"
+              }
+            },
+            "AuthorizerLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "AuthorizerLambdaVersionx7w5hvzBlHYW7EjKAwF9QVlYIl5VFDs5DvnZtjJiM"
+              },
+              "Export": {
+                "Name": "sls-taller-gateway-local-AuthorizerLambdaFunctionQualifiedArn"
+              }
+            },
+            "ServiceEndpoint": {
+              "Description": "URL of the service endpoint",
+              "Value": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    ".execute-api.",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ".",
+                    {
+                      "Ref": "AWS::URLSuffix"
+                    },
+                    "/local"
+                  ]
+                ]
+              },
+              "Export": {
+                "Name": "sls-taller-gateway-local-ServiceEndpoint"
+              }
+            },
+            "MainRestApiId": {
+              "Value": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "Export": {
+                "Name": "MainRestApiId"
+              }
+            },
+            "MainRestApiRootResourceId": {
+              "Value": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "Export": {
+                "Name": "MainRestApiRootResourceId"
+              }
+            },
+            "MainAuthorizerId": {
+              "Value": {
+                "Ref": "MainAuthorizer"
+              },
+              "Export": {
+                "Name": "MainAuthorizerId"
+              }
+            }
+          }
+        },
+        "vpc": {}
+      },
+      "plugins": [
+        "serverless-localstack"
+      ],
+      "custom": {
+        "localstack": {
+          "stages": [
+            "local"
+          ],
+          "host": "http://localhost",
+          "edgePort": 4566,
+          "autostart": false
+        }
+      },
+      "functions": {
+        "ping": {
+          "handler": "src/handlers/ping.ping",
+          "name": "taller-local-Gateway-Ping",
+          "events": [
+            {
+              "http": {
+                "method": "get",
+                "path": "ping",
+                "private": true,
+                "cors": {
+                  "origin": "*",
+                  "methods": [
+                    "OPTIONS",
+                    "GET"
+                  ],
+                  "headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Api-Key",
+                    "X-Amz-Date",
+                    "X-Amz-Security-Token"
+                  ],
+                  "allowCredentials": "<REDACTED>"
+                },
+                "integration": "AWS_PROXY"
+              }
+            }
+          ],
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs22.x",
+          "vpc": {},
+          "versionLogicalId": "PingLambdaVersionKtqW70yhGhlEFqLjV1981ywJzShv7dPbueIaGw3eSZI"
+        },
+        "authorizer": {
+          "handler": "src/handlers/authorizer.authorizer",
+          "name": "taller-local-Authorizer",
+          "events": [],
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "package": {},
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs22.x",
+          "vpc": {},
+          "versionLogicalId": "AuthorizerLambdaVersionx7w5hvzBlHYW7EjKAwF9QVlYIl5VFDs5DvnZtjJiM"
+        }
+      },
+      "resources": {
+        "Resources": {
+          "MainAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+              "Name": "taller-local-jwt-authorizer",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "Type": "TOKEN",
+              "IdentitySource": "method.request.header.Authorization",
+              "AuthorizerUri": {
+                "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizerLambdaFunction.Arn}/invocations"
+              },
+              "AuthorizerResultTtlInSeconds": 300
+            }
+          },
+          "AuthorizerInvokePermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "AuthorizerLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/*"
+              }
+            }
+          },
+          "GatewayResponseUnauthorized": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "UNAUTHORIZED",
+              "StatusCode": "401",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          },
+          "GatewayResponseAccessDenied": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "ACCESS_DENIED",
+              "StatusCode": "403",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          },
+          "GatewayResponseDefault4xx": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "DEFAULT_4XX",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          },
+          "GatewayResponseDefault5xx": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "DEFAULT_5XX",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "MainRestApiId": {
+            "Value": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "Export": {
+              "Name": "MainRestApiId"
+            }
+          },
+          "MainRestApiRootResourceId": {
+            "Value": {
+              "Fn::GetAtt": [
+                "ApiGatewayRestApi",
+                "RootResourceId"
+              ]
+            },
+            "Export": {
+              "Name": "MainRestApiRootResourceId"
+            }
+          },
+          "MainAuthorizerId": {
+            "Value": {
+              "Ref": "MainAuthorizer"
+            },
+            "Export": {
+              "Name": "MainAuthorizerId"
+            }
+          }
+        }
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs22.x",
+      "stage": "local",
+      "region": "us-east-1",
+      "environment": {
+        "STAGE": "local",
+        "JWT_SECRET": "<REDACTED>",
+        "CORS_ORIGINS": "*"
+      },
+      "apiGateway": {
+        "usagePlan": [
+          {
+            "freeTier": {
+              "quota": {
+                "limit": 10000,
+                "period": "MONTH"
+              },
+              "throttle": {
+                "rateLimit": 10,
+                "burstLimit": 20
+              }
+            }
+          }
+        ],
+        "apiKeys": "<REDACTED>"
+      },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "PingLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/taller-local-Gateway-Ping"
+            }
+          },
+          "AuthorizerLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/taller-local-Authorizer"
+            }
+          },
+          "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": [
+                        "lambda.amazonaws.com"
+                      ]
+                    },
+                    "Action": [
+                      "sts:AssumeRole"
+                    ]
+                  }
+                ]
+              },
+              "Policies": [
+                {
+                  "PolicyName": {
+                    "Fn::Join": [
+                      "-",
+                      [
+                        "taller-gateway",
+                        "local",
+                        "lambda"
+                      ]
+                    ]
+                  },
+                  "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogStream",
+                          "logs:CreateLogGroup",
+                          "logs:TagResource"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Gateway-Ping:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Authorizer:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Gateway-Ping:*:*"
+                          },
+                          {
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Authorizer:*:*"
+                          }
+                        ]
+                      },
+                      {
+                        "Effect": "Allow",
+                        "Action": [
+                          "logs:CreateLogGroup",
+                          "logs:CreateLogStream",
+                          "logs:PutLogEvents"
+                        ],
+                        "Resource": "*"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "Path": "/",
+              "RoleName": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    "taller-gateway",
+                    "local",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "lambdaRole"
+                  ]
+                ]
+              }
+            }
+          },
+          "PingLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+                "S3Key": "serverless/taller-gateway/local/1794257279862-2026-11-09T20:47:59.862Z/taller-gateway.zip"
+              },
+              "Handler": "src/handlers/ping.ping",
+              "Runtime": "nodejs22.x",
+              "FunctionName": "taller-local-Gateway-Ping",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "STAGE": "local",
+                  "JWT_SECRET": "<REDACTED>",
+                  "CORS_ORIGINS": "*",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "PingLogGroup"
+            ]
+          },
+          "AuthorizerLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+                "S3Key": "serverless/taller-gateway/local/1794257279862-2026-11-09T20:47:59.862Z/taller-gateway.zip"
+              },
+              "Handler": "src/handlers/authorizer.authorizer",
+              "Runtime": "nodejs22.x",
+              "FunctionName": "taller-local-Authorizer",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "STAGE": "local",
+                  "JWT_SECRET": "<REDACTED>",
+                  "CORS_ORIGINS": "*",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "AuthorizerLogGroup"
+            ]
+          },
+          "PingLambdaVersionKtqW70yhGhlEFqLjV1981ywJzShv7dPbueIaGw3eSZI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "PingLambdaFunction"
+              },
+              "CodeSha256": "y+/F+XjyEVFrTidxuqPT7WCMyeJak61D8u0Whw5DHUc="
+            }
+          },
+          "AuthorizerLambdaVersionx7w5hvzBlHYW7EjKAwF9QVlYIl5VFDs5DvnZtjJiM": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "AuthorizerLambdaFunction"
+              },
+              "CodeSha256": "y+/F+XjyEVFrTidxuqPT7WCMyeJak61D8u0Whw5DHUc="
+            }
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "local-taller-gateway",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              },
+              "Policy": ""
+            }
+          },
+          "ApiGatewayResourcePing": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "ping",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodPingOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourcePing"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodPingGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourcePing"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": "<REDACTED>",
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "PingLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "PingLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1794257274677": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "local"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodPingOptions",
+              "ApiGatewayMethodPingGet"
+            ]
+          },
+          "ApiGatewayApiKeyFreeTier1": "<REDACTED>",
+          "ApiGatewayUsagePlanFreeTier": {
+            "Type": "AWS::ApiGateway::UsagePlan",
+            "DependsOn": "ApiGatewayDeployment1794257274677",
+            "Properties": {
+              "ApiStages": [
+                {
+                  "ApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  "Stage": "local"
+                }
+              ],
+              "Description": "Usage plan \"freeTier\" for taller-gateway local stage",
+              "UsagePlanName": "taller-gateway-freeTier-local",
+              "Quota": {
+                "Limit": 10000,
+                "Period": "MONTH"
+              },
+              "Throttle": {
+                "BurstLimit": 20,
+                "RateLimit": 10
+              }
+            }
+          },
+          "ApiGatewayUsagePlanKeyFreeTier1": {
+            "Type": "AWS::ApiGateway::UsagePlanKey",
+            "Properties": {
+              "KeyId": {
+                "Ref": "ApiGatewayApiKeyFreeTier1"
+              },
+              "KeyType": "API_KEY",
+              "UsagePlanId": {
+                "Ref": "ApiGatewayUsagePlanFreeTier"
+              }
+            }
+          },
+          "PingLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "PingLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "MainAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+              "Name": "taller-local-jwt-authorizer",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "Type": "TOKEN",
+              "IdentitySource": "method.request.header.Authorization",
+              "AuthorizerUri": {
+                "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizerLambdaFunction.Arn}/invocations"
+              },
+              "AuthorizerResultTtlInSeconds": 300
+            }
+          },
+          "AuthorizerInvokePermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "AuthorizerLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/*"
+              }
+            }
+          },
+          "GatewayResponseUnauthorized": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "UNAUTHORIZED",
+              "StatusCode": "401",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          },
+          "GatewayResponseAccessDenied": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "ACCESS_DENIED",
+              "StatusCode": "403",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          },
+          "GatewayResponseDefault4xx": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "DEFAULT_4XX",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          },
+          "GatewayResponseDefault5xx": {
+            "Type": "AWS::ApiGateway::GatewayResponse",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ResponseType": "DEFAULT_5XX",
+              "ResponseParameters": {
+                "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+                "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+            "Export": {
+              "Name": "sls-taller-gateway-local-ServerlessDeploymentBucketName"
+            }
+          },
+          "PingLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "PingLambdaVersionKtqW70yhGhlEFqLjV1981ywJzShv7dPbueIaGw3eSZI"
+            },
+            "Export": {
+              "Name": "sls-taller-gateway-local-PingLambdaFunctionQualifiedArn"
+            }
+          },
+          "AuthorizerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "AuthorizerLambdaVersionx7w5hvzBlHYW7EjKAwF9QVlYIl5VFDs5DvnZtjJiM"
+            },
+            "Export": {
+              "Name": "sls-taller-gateway-local-AuthorizerLambdaFunctionQualifiedArn"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/local"
+                ]
+              ]
+            },
+            "Export": {
+              "Name": "sls-taller-gateway-local-ServiceEndpoint"
+            }
+          },
+          "MainRestApiId": {
+            "Value": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "Export": {
+              "Name": "MainRestApiId"
+            }
+          },
+          "MainRestApiRootResourceId": {
+            "Value": {
+              "Fn::GetAtt": [
+                "ApiGatewayRestApi",
+                "RootResourceId"
+              ]
+            },
+            "Export": {
+              "Name": "MainRestApiRootResourceId"
+            }
+          },
+          "MainAuthorizerId": {
+            "Value": {
+              "Ref": "MainAuthorizer"
+            },
+            "Export": {
+              "Name": "MainAuthorizerId"
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "dashboard": {
+      "isEnabledForService": false,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": null,
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": null,
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "serviceRawFile": "service: taller-gateway\nframeworkVersion: \"4\"\n\nbuild:\n  esbuild:\n    bundle: true\n    minify: false\n    sourcemap: true\n    target: node22\n\nprovider:\n  name: aws\n  runtime: nodejs22.x\n  stage: ${opt:stage, 'local'}\n  region: us-east-1\n  environment:\n    STAGE: ${self:provider.stage}\n    JWT_SECRET: ${ssm:/taller/${self:provider.stage}/jwt-secret, 'local-dev-secret'}\n    CORS_ORIGINS: ${file(./config/config-${self:provider.stage}.json):CORS_ORIGINS}\n  apiGateway:\n    usagePlan:\n      - freeTier:\n          quota:\n            limit: 10000\n            period: MONTH\n          throttle:\n            rateLimit: 10\n            burstLimit: 20\n    apiKeys:\n      - freeTier:\n          - ${self:provider.stage}-AmazonLite-DefaultKey\n  iam:\n    role:\n      statements:\n        - Effect: Allow\n          Action:\n            - logs:CreateLogGroup\n            - logs:CreateLogStream\n            - logs:PutLogEvents\n          Resource: \"*\"\n\nplugins:\n  - serverless-localstack\n\ncustom:\n  localstack:\n    stages: [local]\n    host: http://localhost\n    edgePort: 4566\n    autostart: false\n\nfunctions:\n  ping:\n    handler: src/handlers/ping.ping\n    name: taller-${self:provider.stage}-Gateway-Ping\n    events:\n      - http:\n          method: get\n          path: /ping\n          private: true\n          cors:\n            origin: '*'\n            headers:\n              - Content-Type\n              - Authorization\n              - X-Api-Key\n              - X-Amz-Date\n              - X-Amz-Security-Token\n\n  authorizer:\n    handler: src/handlers/authorizer.authorizer\n    name: taller-${self:provider.stage}-Authorizer\n\nresources:\n  Resources:\n    MainAuthorizer:\n      Type: AWS::ApiGateway::Authorizer\n      Properties:\n        Name: taller-${self:provider.stage}-jwt-authorizer\n        RestApiId: { Ref: ApiGatewayRestApi }\n        Type: TOKEN\n        IdentitySource: method.request.header.Authorization\n        AuthorizerUri:\n          Fn::Sub: >-\n            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizerLambdaFunction.Arn}/invocations\n        AuthorizerResultTtlInSeconds: 300\n\n    AuthorizerInvokePermission:\n      Type: AWS::Lambda::Permission\n      Properties:\n        FunctionName: { Fn::GetAtt: [AuthorizerLambdaFunction, Arn] }\n        Action: lambda:InvokeFunction\n        Principal: apigateway.amazonaws.com\n        SourceArn:\n          Fn::Sub: arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/*\n\n    GatewayResponseUnauthorized:\n      Type: AWS::ApiGateway::GatewayResponse\n      Properties:\n        RestApiId: { Ref: ApiGatewayRestApi }\n        ResponseType: UNAUTHORIZED\n        StatusCode: \"401\"\n        ResponseParameters:\n          gatewayresponse.header.Access-Control-Allow-Origin: \"'*'\"\n          gatewayresponse.header.Access-Control-Allow-Headers: \"'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'\"\n\n    GatewayResponseAccessDenied:\n      Type: AWS::ApiGateway::GatewayResponse\n      Properties:\n        RestApiId: { Ref: ApiGatewayRestApi }\n        ResponseType: ACCESS_DENIED\n        StatusCode: \"403\"\n        ResponseParameters:\n          gatewayresponse.header.Access-Control-Allow-Origin: \"'*'\"\n          gatewayresponse.header.Access-Control-Allow-Headers: \"'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'\"\n\n    GatewayResponseDefault4xx:\n      Type: AWS::ApiGateway::GatewayResponse\n      Properties:\n        RestApiId: { Ref: ApiGatewayRestApi }\n        ResponseType: DEFAULT_4XX\n        ResponseParameters:\n          gatewayresponse.header.Access-Control-Allow-Origin: \"'*'\"\n          gatewayresponse.header.Access-Control-Allow-Headers: \"'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'\"\n\n    GatewayResponseDefault5xx:\n      Type: AWS::ApiGateway::GatewayResponse\n      Properties:\n        RestApiId: { Ref: ApiGatewayRestApi }\n        ResponseType: DEFAULT_5XX\n        ResponseParameters:\n          gatewayresponse.header.Access-Control-Allow-Origin: \"'*'\"\n          gatewayresponse.header.Access-Control-Allow-Headers: \"'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'\"\n\n  Outputs:\n    MainRestApiId:\n      Value: { Ref: ApiGatewayRestApi }\n      Export: { Name: MainRestApiId }\n    MainRestApiRootResourceId:\n      Value:\n        Fn::GetAtt: [ApiGatewayRestApi, RootResourceId]\n      Export: { Name: MainRestApiRootResourceId }\n    MainAuthorizerId:\n      Value: { Ref: MainAuthorizer }\n      Export: { Name: MainAuthorizerId }\n",
+    "command": [
+      "deploy"
+    ],
+    "options": {
+      "stage": "local",
+      "aws-profile": "localstack"
+    },
+    "orgId": "721d55fc-9e2c-479f-adb7-47b9c06d64fe",
+    "orgName": "julary2003",
+    "userId": "lxDFHY3cWD8FVpPnnz",
+    "userName": "julary2003",
+    "serviceProviderAwsAccountId": "000000000000",
+    "serviceProviderAwsCfStackName": "taller-gateway-local",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:000000000000:stack/taller-gateway-local/c4b1fd4a-cd91-4ce0-81b5-231d2bfbe6b8",
+    "serviceProviderAwsCfStackCreated": "2026-11-09T20:48:00.240Z",
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": "CREATE_COMPLETE",
+    "serviceProviderAwsCfStackOutputs": [
+      {
+        "OutputKey": "AuthorizerLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:000000000000:function:taller-local-Authorizer:1",
+        "ExportName": "sls-taller-gateway-local-AuthorizerLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "MainAuthorizerId",
+        "OutputValue": "0a9d14",
+        "ExportName": "MainAuthorizerId"
+      },
+      {
+        "OutputKey": "MainRestApiId",
+        "OutputValue": "abugvndokk",
+        "ExportName": "MainRestApiId"
+      },
+      {
+        "OutputKey": "MainRestApiRootResourceId",
+        "OutputValue": "kiuuxv5rn7",
+        "ExportName": "MainRestApiRootResourceId"
+      },
+      {
+        "OutputKey": "PingLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:000000000000:function:taller-local-Gateway-Ping:1",
+        "ExportName": "sls-taller-gateway-local-PingLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "ServerlessDeploymentBucketName",
+        "OutputValue": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+        "ExportName": "sls-taller-gateway-local-ServerlessDeploymentBucketName"
+      },
+      {
+        "OutputKey": "ServiceEndpoint",
+        "OutputValue": "https://abugvndokk.execute-api.localhost.localstack.cloud:4566/local",
+        "ExportName": "sls-taller-gateway-local-ServiceEndpoint"
+      }
+    ],
+    "compiledCloudFormationTemplate": {
+      "AWSTemplateFormatVersion": "2010-09-09",
+      "Description": "The AWS CloudFormation template for this Serverless application",
+      "Resources": {
+        "PingLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/taller-local-Gateway-Ping"
+          }
+        },
+        "AuthorizerLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/taller-local-Authorizer"
+          }
+        },
+        "IamRoleLambdaExecution": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": [
+                      "lambda.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Policies": [
+              {
+                "PolicyName": {
+                  "Fn::Join": [
+                    "-",
+                    [
+                      "taller-gateway",
+                      "local",
+                      "lambda"
+                    ]
+                  ]
+                },
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:CreateLogStream",
+                        "logs:CreateLogGroup",
+                        "logs:TagResource"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Gateway-Ping:*"
+                        },
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Authorizer:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Gateway-Ping:*:*"
+                        },
+                        {
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/taller-local-Authorizer:*:*"
+                        }
+                      ]
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "logs:CreateLogGroup",
+                        "logs:CreateLogStream",
+                        "logs:PutLogEvents"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ],
+            "Path": "/",
+            "RoleName": {
+              "Fn::Join": [
+                "-",
+                [
+                  "taller-gateway",
+                  "local",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "lambdaRole"
+                ]
+              ]
+            }
+          }
+        },
+        "PingLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+              "S3Key": "serverless/taller-gateway/local/1794257279862-2026-11-09T20:47:59.862Z/taller-gateway.zip"
+            },
+            "Handler": "src/handlers/ping.ping",
+            "Runtime": "nodejs22.x",
+            "FunctionName": "taller-local-Gateway-Ping",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "STAGE": "local",
+                "JWT_SECRET": "<REDACTED>",
+                "CORS_ORIGINS": "*",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "PingLogGroup"
+          ]
+        },
+        "AuthorizerLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+              "S3Key": "serverless/taller-gateway/local/1794257279862-2026-11-09T20:47:59.862Z/taller-gateway.zip"
+            },
+            "Handler": "src/handlers/authorizer.authorizer",
+            "Runtime": "nodejs22.x",
+            "FunctionName": "taller-local-Authorizer",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "STAGE": "local",
+                "JWT_SECRET": "<REDACTED>",
+                "CORS_ORIGINS": "*",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            }
+          },
+          "DependsOn": [
+            "AuthorizerLogGroup"
+          ]
+        },
+        "PingLambdaVersionKtqW70yhGhlEFqLjV1981ywJzShv7dPbueIaGw3eSZI": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "PingLambdaFunction"
+            },
+            "CodeSha256": "y+/F+XjyEVFrTidxuqPT7WCMyeJak61D8u0Whw5DHUc="
+          }
+        },
+        "AuthorizerLambdaVersionx7w5hvzBlHYW7EjKAwF9QVlYIl5VFDs5DvnZtjJiM": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "AuthorizerLambdaFunction"
+            },
+            "CodeSha256": "y+/F+XjyEVFrTidxuqPT7WCMyeJak61D8u0Whw5DHUc="
+          }
+        },
+        "ApiGatewayRestApi": {
+          "Type": "AWS::ApiGateway::RestApi",
+          "Properties": {
+            "Name": "local-taller-gateway",
+            "EndpointConfiguration": {
+              "Types": [
+                "EDGE"
+              ]
+            },
+            "Policy": ""
+          }
+        },
+        "ApiGatewayResourcePing": {
+          "Type": "AWS::ApiGateway::Resource",
+          "Properties": {
+            "ParentId": {
+              "Fn::GetAtt": [
+                "ApiGatewayRestApi",
+                "RootResourceId"
+              ]
+            },
+            "PathPart": "ping",
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            }
+          }
+        },
+        "ApiGatewayMethodPingOptions": {
+          "Type": "AWS::ApiGateway::Method",
+          "Properties": {
+            "AuthorizationType": "NONE",
+            "HttpMethod": "OPTIONS",
+            "MethodResponses": [
+              {
+                "StatusCode": "200",
+                "ResponseParameters": {
+                  "method.response.header.Access-Control-Allow-Origin": true,
+                  "method.response.header.Access-Control-Allow-Headers": true,
+                  "method.response.header.Access-Control-Allow-Methods": true
+                },
+                "ResponseModels": {}
+              }
+            ],
+            "RequestParameters": {},
+            "Integration": {
+              "Type": "MOCK",
+              "RequestTemplates": {
+                "application/json": "{statusCode:200}"
+              },
+              "ContentHandling": "CONVERT_TO_TEXT",
+              "IntegrationResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": "'*'",
+                    "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'",
+                    "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                  },
+                  "ResponseTemplates": {
+                    "application/json": ""
+                  }
+                }
+              ]
+            },
+            "ResourceId": {
+              "Ref": "ApiGatewayResourcePing"
+            },
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            }
+          }
+        },
+        "ApiGatewayMethodPingGet": {
+          "Type": "AWS::ApiGateway::Method",
+          "Properties": {
+            "HttpMethod": "GET",
+            "RequestParameters": {},
+            "ResourceId": {
+              "Ref": "ApiGatewayResourcePing"
+            },
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "ApiKeyRequired": "<REDACTED>",
+            "AuthorizationType": "NONE",
+            "Integration": {
+              "IntegrationHttpMethod": "POST",
+              "Type": "AWS_PROXY",
+              "Uri": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":apigateway:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":lambda:path/2015-03-31/functions/",
+                    {
+                      "Fn::GetAtt": [
+                        "PingLambdaFunction",
+                        "Arn"
+                      ]
+                    },
+                    "/invocations"
+                  ]
+                ]
+              }
+            },
+            "MethodResponses": []
+          },
+          "DependsOn": [
+            "PingLambdaPermissionApiGateway"
+          ]
+        },
+        "ApiGatewayDeployment1794257274677": {
+          "Type": "AWS::ApiGateway::Deployment",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "StageName": "local"
+          },
+          "DependsOn": [
+            "ApiGatewayMethodPingOptions",
+            "ApiGatewayMethodPingGet"
+          ]
+        },
+        "ApiGatewayApiKeyFreeTier1": "<REDACTED>",
+        "ApiGatewayUsagePlanFreeTier": {
+          "Type": "AWS::ApiGateway::UsagePlan",
+          "DependsOn": "ApiGatewayDeployment1794257274677",
+          "Properties": {
+            "ApiStages": [
+              {
+                "ApiId": {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                "Stage": "local"
+              }
+            ],
+            "Description": "Usage plan \"freeTier\" for taller-gateway local stage",
+            "UsagePlanName": "taller-gateway-freeTier-local",
+            "Quota": {
+              "Limit": 10000,
+              "Period": "MONTH"
+            },
+            "Throttle": {
+              "BurstLimit": 20,
+              "RateLimit": 10
+            }
+          }
+        },
+        "ApiGatewayUsagePlanKeyFreeTier1": {
+          "Type": "AWS::ApiGateway::UsagePlanKey",
+          "Properties": {
+            "KeyId": {
+              "Ref": "ApiGatewayApiKeyFreeTier1"
+            },
+            "KeyType": "API_KEY",
+            "UsagePlanId": {
+              "Ref": "ApiGatewayUsagePlanFreeTier"
+            }
+          }
+        },
+        "PingLambdaPermissionApiGateway": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "PingLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  "/*/*"
+                ]
+              ]
+            }
+          }
+        },
+        "MainAuthorizer": {
+          "Type": "AWS::ApiGateway::Authorizer",
+          "Properties": {
+            "Name": "taller-local-jwt-authorizer",
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "Type": "TOKEN",
+            "IdentitySource": "method.request.header.Authorization",
+            "AuthorizerUri": {
+              "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthorizerLambdaFunction.Arn}/invocations"
+            },
+            "AuthorizerResultTtlInSeconds": 300
+          }
+        },
+        "AuthorizerInvokePermission": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "AuthorizerLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Sub": "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/*"
+            }
+          }
+        },
+        "GatewayResponseUnauthorized": {
+          "Type": "AWS::ApiGateway::GatewayResponse",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "ResponseType": "UNAUTHORIZED",
+            "StatusCode": "401",
+            "ResponseParameters": {
+              "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+              "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+            }
+          }
+        },
+        "GatewayResponseAccessDenied": {
+          "Type": "AWS::ApiGateway::GatewayResponse",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "ResponseType": "ACCESS_DENIED",
+            "StatusCode": "403",
+            "ResponseParameters": {
+              "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+              "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+            }
+          }
+        },
+        "GatewayResponseDefault4xx": {
+          "Type": "AWS::ApiGateway::GatewayResponse",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "ResponseType": "DEFAULT_4XX",
+            "ResponseParameters": {
+              "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+              "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+            }
+          }
+        },
+        "GatewayResponseDefault5xx": {
+          "Type": "AWS::ApiGateway::GatewayResponse",
+          "Properties": {
+            "RestApiId": {
+              "Ref": "ApiGatewayRestApi"
+            },
+            "ResponseType": "DEFAULT_5XX",
+            "ResponseParameters": {
+              "gatewayresponse.header.Access-Control-Allow-Origin": "'*'",
+              "gatewayresponse.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Api-Key,X-Amz-Date,X-Amz-Security-Token'"
+            }
+          }
+        }
+      },
+      "Outputs": {
+        "ServerlessDeploymentBucketName": {
+          "Value": "serverless-framework-deployments-us-east-1-b7987123-2d34",
+          "Export": {
+            "Name": "sls-taller-gateway-local-ServerlessDeploymentBucketName"
+          }
+        },
+        "PingLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "PingLambdaVersionKtqW70yhGhlEFqLjV1981ywJzShv7dPbueIaGw3eSZI"
+          },
+          "Export": {
+            "Name": "sls-taller-gateway-local-PingLambdaFunctionQualifiedArn"
+          }
+        },
+        "AuthorizerLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "AuthorizerLambdaVersionx7w5hvzBlHYW7EjKAwF9QVlYIl5VFDs5DvnZtjJiM"
+          },
+          "Export": {
+            "Name": "sls-taller-gateway-local-AuthorizerLambdaFunctionQualifiedArn"
+          }
+        },
+        "ServiceEndpoint": {
+          "Description": "URL of the service endpoint",
+          "Value": {
+            "Fn::Join": [
+              "",
+              [
+                "https://",
+                {
+                  "Ref": "ApiGatewayRestApi"
+                },
+                ".execute-api.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix"
+                },
+                "/local"
+              ]
+            ]
+          },
+          "Export": {
+            "Name": "sls-taller-gateway-local-ServiceEndpoint"
+          }
+        },
+        "MainRestApiId": {
+          "Value": {
+            "Ref": "ApiGatewayRestApi"
+          },
+          "Export": {
+            "Name": "MainRestApiId"
+          }
+        },
+        "MainRestApiRootResourceId": {
+          "Value": {
+            "Fn::GetAtt": [
+              "ApiGatewayRestApi",
+              "RootResourceId"
+            ]
+          },
+          "Export": {
+            "Name": "MainRestApiRootResourceId"
+          }
+        },
+        "MainAuthorizerId": {
+          "Value": {
+            "Ref": "MainAuthorizer"
+          },
+          "Export": {
+            "Name": "MainAuthorizerId"
+          }
+        }
+      }
+    }
+  }
+}

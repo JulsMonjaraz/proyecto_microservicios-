@@ -1,0 +1,15 @@
+{
+  "name": "taller-orders",
+  "version": "1.0.0",
+  "description": "Serverless project for the orders repository",
+  "main": "index.js",
+  "scripts": {
+    "build": "serverless package --stage local",
+    "deploy": "serverless deploy --stage local --aws-profile localstack",
+    "deploy:dev": "serverless deploy --stage develop --aws-profile charlie-personal-taller",
+    "remove:dev": "serverless remove --stage develop --aws-profile charlie-personal-taller"
+  },
+  "author": "charlie.gallegos",
+  "license": "ISC",
+  "dependencies": {}
+}

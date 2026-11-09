@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/handlers/ping.ts"],
+  "sourcesContent": ["import type { APIGatewayProxyHandler } from \"aws-lambda\";\n\nexport const ping: APIGatewayProxyHandler = async () => ({\n  statusCode: 200,\n  headers: { \"Access-Control-Allow-Origin\": \"*\" },\n  body: JSON.stringify({ message: \"pong\" }),\n});\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAEO,IAAM,OAA+B,aAAa;AAAA,EACvD,YAAY;AAAA,EACZ,SAAS,EAAE,+BAA+B,IAAI;AAAA,EAC9C,MAAM,KAAK,UAAU,EAAE,SAAS,OAAO,CAAC;AAC1C;",
+  "names": []
+}
